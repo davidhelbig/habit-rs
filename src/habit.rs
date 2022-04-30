@@ -1,20 +1,23 @@
 use chrono::{Local, NaiveDate};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Habits {
-    habits: Vec<Habit>
+    habits: Vec<Habit>,
 }
 
 impl Habits {
     pub fn new() -> Self {
-        Habits {
-            habits: vec![]
-        }
+        Habits { habits: vec![] }
     }
 
     pub fn add(&mut self, habit: Habit) {
         self.habits.push(habit)
+    }
+
+    pub fn return_mut_by_name(&mut self, name: &str) -> Option<&mut Habit> {
+        self.habits.iter_mut().find(|h| h.name == name)
     }
 
     pub fn from_json(serialized: &str) -> Self {
@@ -30,7 +33,7 @@ impl Habits {
 pub struct Habit {
     name: String,
     start_date: NaiveDate,
-    completed_on: Vec<NaiveDate>,
+    completed_on: BTreeSet<NaiveDate>,
 }
 
 impl Habit {
@@ -38,7 +41,7 @@ impl Habit {
         Habit {
             name,
             start_date,
-            completed_on: vec![],
+            completed_on: BTreeSet::new(),
         }
     }
 
@@ -46,15 +49,16 @@ impl Habit {
         Habit {
             name,
             start_date: Local::now().naive_local().date(),
-            completed_on: vec![]
+            completed_on: BTreeSet::new(),
         }
     }
 
+    // TODO: make sure that date gets only added once
     pub fn add_completed_day(&mut self, date: NaiveDate) {
         if date < self.start_date {
             panic!("Completed date cannot be before start date!");
         }
-        self.completed_on.push(date)
+        self.completed_on.insert(date);
     }
 
     pub fn to_json(&self) -> String {
@@ -78,7 +82,7 @@ mod tests {
         let habit = Habit {
             name: String::from("Reading"),
             start_date,
-            completed_on: vec![],
+            completed_on: BTreeSet::new(),
         };
 
         assert_eq!(Habit::new(String::from("Reading"), start_date), habit);
@@ -109,5 +113,19 @@ mod tests {
         let deserialized = Habit::from_json(&serialized);
 
         assert_eq!(habit, deserialized);
+    }
+
+    fn can_return_by_name() {
+        let reading = Habit::new(String::from("Reading"), NaiveDate::from_ymd(2022, 10, 31));
+        let meditation = Habit::new(String::from("Meditation"), NaiveDate::from_ymd(2022, 9, 30));
+        let mut habits = Habits::new();
+        habits.add(reading);
+        habits.add(meditation);
+
+        let returned = habits
+            .return_mut_by_name(&String::from("Meditation"))
+            .unwrap();
+
+        // assert_eq!(meditation, *returned);
     }
 }

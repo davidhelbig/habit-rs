@@ -20,6 +20,10 @@ enum Commands {
     New {
         #[clap(short, long)]
         name: String
+    },
+    Done {
+        name: String,
+        date: chrono::NaiveDate
     }
 }
 
@@ -38,6 +42,14 @@ fn main() {
             Commands::New{ name } =>  {
                 habits.add(Habit::start_today(name))
             },
+            Commands::Done{ name, date } => {
+                let habit = habits.return_mut_by_name(&name);
+                if let Some(h) = habit {
+                    h.add_completed_day(date)
+                } else {
+                    eprintln!("Could not find find habit with name `{name}`");
+                }
+            }
             _ => todo!()
         }
 
