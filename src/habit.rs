@@ -63,6 +63,10 @@ impl Habit {
         self.completed_on.insert(date);
     }
 
+    pub fn get_num_completed(&self) -> usize {
+        self.completed_on.len()
+    }
+
     pub fn to_json(&self) -> String {
         serde_json::to_string(self).expect("Could not serialize to json.")
     }
@@ -130,5 +134,15 @@ mod tests {
             .unwrap();
 
         // assert_eq!(meditation, *returned);
+    }
+
+    #[test]
+    fn adding_date_is_idempotent() {
+        let mut reading = Habit::new(String::from("Reading"), NaiveDate::from_ymd(2022, 10, 31));
+
+        reading.add_completed_day(NaiveDate::from_ymd(2022, 10, 31));
+        assert_eq!(reading.get_num_completed(), 1);
+        reading.add_completed_day(NaiveDate::from_ymd(2022, 10, 31));
+        assert_eq!(reading.get_num_completed(), 1);
     }
 }
