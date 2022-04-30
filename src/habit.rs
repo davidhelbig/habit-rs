@@ -29,6 +29,7 @@ impl Habits {
     }
 }
 
+/// Struct that represents a single habit to be tracked.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Habit {
     name: String,
@@ -45,6 +46,8 @@ impl Habit {
         }
     }
 
+    /// A convenience function that creates a new habit and sets the `start_date`
+    /// to today's date.
     pub fn start_today(name: String) -> Self {
         Habit {
             name,
@@ -53,7 +56,6 @@ impl Habit {
         }
     }
 
-    // TODO: make sure that date gets only added once
     pub fn add_completed_day(&mut self, date: NaiveDate) {
         if date < self.start_date {
             panic!("Completed date cannot be before start date!");
