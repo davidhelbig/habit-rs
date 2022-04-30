@@ -117,6 +117,7 @@ mod tests {
         assert_eq!(habit, deserialized);
     }
 
+    #[test]
     fn can_return_by_name() {
         let reading = Habit::new(String::from("Reading"), NaiveDate::from_ymd(2022, 10, 31));
         let meditation = Habit::new(String::from("Meditation"), NaiveDate::from_ymd(2022, 9, 30));
